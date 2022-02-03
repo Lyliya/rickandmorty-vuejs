@@ -5,8 +5,8 @@ const base_url = "https://rickandmortyapi.com/api/character";
 export default createStore({
   state: {
     currentPage: 1,
-    currentStatus: "dead",
-    currentName: "Rick",
+    currentStatus: "",
+    currentName: "",
     currentCharacter: {},
     currentCharacterCount: 0,
     currentTotalPage: 0,
@@ -22,14 +22,27 @@ export default createStore({
     setTotalPage(state, payload) {
       state.currentTotalPage = payload;
     },
+    setCurrentName(state, payload) {
+      state.currentName = payload;
+      state.currentPage = 1;
+      state.characters = [];
+
+      this.dispatch("getCharacters");
+    },
     setCurrentPage(state, payload) {
       state.currentPage = payload;
     }
   },
   actions: {
     async getCharacters(state) {
-      console.log("heho");
       const page = state.getters.getCurrentPage;
+      let current = state.getters.getCharactersPage(page);
+
+      if (current) {
+        console.log("use cached page", page);
+        return page;
+      }
+
       const status = state.getters.getCurrentStatus;
       const name = state.getters.getCurrentName;
       let url = `${base_url}?page=${page}`;
@@ -41,7 +54,15 @@ export default createStore({
         url += `&name=${name}`;
       }
 
+      console.log(url);
+
       const rawCharacters = await fetch(url);
+
+      if (rawCharacters.status != 200) {
+        console.log("error");
+        return;
+      }
+
       const characters = await rawCharacters.json();
 
       console.log(characters);
@@ -55,7 +76,7 @@ export default createStore({
     getCharacters: state => state.characters,
     getCurrentPage: state => state.currentPage,
     getCharactersPage: state => page =>
-      state.characters.find(e => e.info.page == page),
+      state.characters.find(e => e.page == page),
     getCurrentStatus: state => state.currentStatus,
     getCurrentName: state => state.currentName,
     getTotalPage: state => state.currentTotalPage,
