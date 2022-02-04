@@ -26,8 +26,16 @@ export default createStore({
       state.currentName = payload;
       state.currentPage = 1;
       state.characters = [];
-
       this.dispatch("getCharacters");
+    },
+    setCurrentStatus(state, payload) {
+      state.currentStatus = payload;
+      state.currentPage = 1;
+      state.characters = [];
+      this.dispatch("getCharacters");
+    },
+    setCurrentCharacter(state, payload) {
+      state.currentCharacter = payload;
     },
     setCurrentPage(state, payload) {
       state.currentPage = payload;
@@ -54,21 +62,34 @@ export default createStore({
         url += `&name=${name}`;
       }
 
-      console.log(url);
-
       const rawCharacters = await fetch(url);
 
       if (rawCharacters.status != 200) {
-        console.log("error");
+        state.commit("setCurrentCharacter", []);
+        state.commit("setTotalPage", 0);
+        state.commit("setCharacterCount", 0);
         return;
       }
 
       const characters = await rawCharacters.json();
 
-      console.log(characters);
       state.commit("setCharacters", { page, results: characters.results });
       state.commit("setTotalPage", characters.info.pages);
       state.commit("setCharacterCount", characters.info.count);
+    },
+    async getCharacterById(state, payload) {
+      const id = payload.id;
+      let url = `${base_url}/${id}`;
+
+      const rawCharacter = await fetch(url);
+
+      if (rawCharacter.status != 200) {
+        console.log("error");
+        return;
+      }
+
+      const character = await rawCharacter.json();
+      state.commit("setCurrentCharacter", character);
     }
   },
   modules: {},
@@ -80,6 +101,7 @@ export default createStore({
     getCurrentStatus: state => state.currentStatus,
     getCurrentName: state => state.currentName,
     getTotalPage: state => state.currentTotalPage,
-    getCurrentCount: state => state.currentCharacterCount
+    getCurrentCount: state => state.currentCharacterCount,
+    getCurrentCharacter: state => state.currentCharacter
   }
 });

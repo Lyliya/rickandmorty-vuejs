@@ -1,73 +1,108 @@
 <template>
-  <div class="home">
-    <!-- <HelloWorld msg="Welcome to Your Vue.js App" /> -->
+  <div class="characters">
+    <div>
+      <input
+        type="text"
+        placeholder="Morty"
+        @keyup.enter="onEnter"
+        v-model="filter"
+        class="filter-input"
+      />
 
-    <input
-      type="text"
-      placeholder="Morty"
-      @keyup.enter="onEnter"
-      v-model="filter"
-    />
+      <select v-model="status" class="status-select">
+        <option value="">All</option>
+        <option value="alive">Alive</option>
+        <option value="dead">Dead</option>
+        <option value="unknown">Unknown</option>
+      </select>
+    </div>
 
-    <p>Current Page: {{ currentPage }}</p>
-    <p>Count: {{ count }}</p>
-    <p>TotalPage: {{ totalPage }}</p>
-    <div v-if="characters">
-      <div v-for="(character, idx) in characters.results" :key="idx">
-        <img :src="character.image" :alt="character.name" />
-        <p>{{ character.name }}</p>
+    <div v-if="!characters || characters.length == 0">No character found</div>
+
+    <div v-if="characters" class="container">
+      <div
+        v-for="(character, idx) in characters.results"
+        :key="idx"
+        @click="
+          () => {
+            redirect(character);
+          }
+        "
+        class="card-holder"
+      >
+        <Card :character="character" />
       </div>
     </div>
 
-    <div v-if="currentPage < totalPage">
-      <button @click="getNextPage">{{ currentPage + 1 }}</button>
+    <div class="page-nav">
+      <div v-if="currentPage > 1">
+        <p @click="getPreviousPage">{{ currentPage - 1 }}</p>
+      </div>
+      <div>
+        <p class="active">{{ currentPage }}</p>
+      </div>
+      <div v-if="currentPage < totalPage">
+        <p @click="getNextPage">{{ currentPage + 1 }}</p>
+      </div>
     </div>
-    <div>
-      <p>{{ currentPage }}</p>
-    </div>
-    <div v-if="currentPage > 1">
-      <button @click="getPreviousPage">{{ currentPage - 1 }}</button>
-    </div>
-    <!-- <div v-if="pages[pages.length - 1] && pages[pages.length - 1].info.next">
-      <button @click="getNextPage">Next page</button>
-    </div> -->
-    <!-- <button v-if="pages[0].info.next">Next page</button> -->
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-// import HelloWorld from "@/components/HelloWorld.vue";
+import { mapGetters, mapActions, mapMutations } from "vuex";
 
-import { mapGetters } from "vuex";
+import Card from "@/components/Card.vue";
 
 export default {
-  name: "Home",
+  name: "Characters",
   components: {
-    // HelloWorld
+    Card
   },
 
   data: function () {
     return {
-      filter: ""
+      filter: "",
+      status: ""
     };
   },
 
+  watch: {
+    status: function (newStatus) {
+      this.$store.commit("setCurrentStatus", newStatus);
+    }
+  },
+
   methods: {
+    ...mapActions(["getCharacters"]),
+    ...mapMutations([
+      "setCurrentPage",
+      "setCurrentName",
+      "setCurrentCharacter"
+    ]),
+
+    changeStatus: function (evt, status) {
+      if (this.$store.getters.getCurrentStatus == status) {
+        evt.preventDefault();
+        this.status = "";
+        evt.target.checked = false;
+      }
+    },
     getNextPage: function () {
-      console.log("NextPage");
-      this.$store.commit("setCurrentPage", this.currentPage + 1);
-      this.$store.dispatch("getCharacters");
+      this.setCurrentPage(this.currentPage + 1);
+      this.getCharacters();
     },
     getPreviousPage: function () {
-      console.log("PreviousPage");
-      this.$store.commit("setCurrentPage", this.currentPage - 1);
-      this.$store.dispatch("getCharacters");
+      this.setCurrentPage(this.currentPage - 1);
+      this.getCharacters();
     },
 
     onEnter: function () {
-      console.log("onEnter", this.filter);
-      this.$store.commit("setCurrentName", this.filter);
+      this.setCurrentName(this.filter);
+    },
+
+    redirect: function (character) {
+      this.setCurrentCharacter(character);
+      this.$router.push({ path: `/characters/${character.id}` });
     }
   },
 
@@ -75,20 +110,72 @@ export default {
     ...mapGetters({
       count: "getCurrentCount",
       totalPage: "getTotalPage",
-      currentPage: "getCurrentPage"
+      currentPage: "getCurrentPage",
+      getCharactersPage: "getCharactersPage"
     }),
 
     characters() {
-      console.log(
-        "Debug:",
-        this.$store.getters.getCharactersPage(this.currentPage)
-      );
-      return this.$store.getters.getCharactersPage(this.currentPage);
+      return this.getCharactersPage(this.currentPage);
     }
   },
 
   mounted() {
-    this.$store.dispatch("getCharacters");
+    this.getCharacters();
   }
 };
 </script>
+
+<style scoped>
+.characters {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.container {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+.card-holder {
+  width: 800px;
+  height: 250px;
+  margin-bottom: 10px;
+}
+
+.page-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.page-nav p {
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.active {
+  font-weight: bold;
+}
+
+.filter-input {
+  margin-top: 30px;
+  margin-bottom: 30px;
+  width: 200px;
+  font-size: 1.5em;
+  color: #e2e2e2;
+  background-color: #383838;
+  border: 0;
+  text-align: center;
+}
+
+.status-select {
+  font-size: 1.5em;
+  background-color: #383838;
+  border: 0;
+  color: #e2e2e2;
+  margin-left: 20px;
+  text-align: center;
+}
+</style>
