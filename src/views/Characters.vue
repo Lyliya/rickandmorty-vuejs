@@ -35,14 +35,56 @@
     </div>
 
     <div class="page-nav">
+      <div v-if="currentPage > 2" class="flex">
+        <p
+          @click="
+            () => {
+              getPage(1);
+            }
+          "
+        >
+          1
+        </p>
+        <p>...</p>
+      </div>
       <div v-if="currentPage > 1">
-        <p @click="getPreviousPage">{{ currentPage - 1 }}</p>
+        <p
+          @click="
+            () => {
+              getPage(currentPage - 1);
+            }
+          "
+        >
+          {{ currentPage - 1 }}
+        </p>
       </div>
       <div>
         <p class="active">{{ currentPage }}</p>
       </div>
       <div v-if="currentPage < totalPage">
-        <p @click="getNextPage">{{ currentPage + 1 }}</p>
+        <p
+          @click="
+            () => {
+              getPage(currentPage + 1);
+            }
+          "
+        >
+          {{ currentPage + 1 }}
+        </p>
+      </div>
+
+      <div v-if="currentPage + 1 < totalPage" class="flex">
+        <p>...</p>
+
+        <p
+          @click="
+            () => {
+              getPage(totalPage);
+            }
+          "
+        >
+          {{ totalPage }}
+        </p>
       </div>
     </div>
   </div>
@@ -69,6 +111,10 @@ export default {
   watch: {
     status: function (newStatus) {
       this.$store.commit("setCurrentStatus", newStatus);
+    },
+    "$route.query.page": function () {
+      this.setCurrentPage(this.$route.query.page);
+      this.getCharacters();
     }
   },
 
@@ -87,13 +133,10 @@ export default {
         evt.target.checked = false;
       }
     },
-    getNextPage: function () {
-      this.setCurrentPage(this.currentPage + 1);
+    getPage: function (page) {
+      this.setCurrentPage(page);
       this.getCharacters();
-    },
-    getPreviousPage: function () {
-      this.setCurrentPage(this.currentPage - 1);
-      this.getCharacters();
+      this.$router.push({ path: `/characters`, query: { page } });
     },
 
     onEnter: function () {
@@ -120,6 +163,9 @@ export default {
   },
 
   mounted() {
+    if (this.$route.query.page) {
+      this.setCurrentPage(this.$route.query.page);
+    }
     this.getCharacters();
   }
 };
@@ -130,6 +176,8 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  max-width: 1300px;
 }
 
 .container {
@@ -139,8 +187,7 @@ export default {
 }
 
 .card-holder {
-  width: 800px;
-  height: 250px;
+  width: 300px;
   margin-bottom: 10px;
 }
 
@@ -148,10 +195,11 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  font-size: 1.5em;
 }
 
 .page-nav p {
-  margin-right: 10px;
+  margin: 20px;
   cursor: pointer;
 }
 
@@ -177,5 +225,9 @@ export default {
   color: #e2e2e2;
   margin-left: 20px;
   text-align: center;
+}
+
+.flex {
+  display: flex;
 }
 </style>

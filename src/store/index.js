@@ -38,7 +38,9 @@ export default createStore({
       state.currentCharacter = payload;
     },
     setCurrentPage(state, payload) {
-      state.currentPage = payload;
+      let pageNb = parseInt(payload);
+      if (isNaN(pageNb) || pageNb < 1) state.currentPage = 1;
+      else state.currentPage = pageNb;
     }
   },
   actions: {

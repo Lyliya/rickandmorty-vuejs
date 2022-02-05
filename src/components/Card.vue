@@ -1,15 +1,11 @@
 <template>
   <div class="card-container">
+    <p class="status" :class="character.status.toLowerCase()">
+      {{ character.status }}
+    </p>
     <img :src="character.image" :alt="character.name" />
     <div class="card-body">
       <h1>{{ character.name }}</h1>
-      <p>{{ character.status }} - {{ character.species }}</p>
-
-      <h2>Origin</h2>
-      <p>{{ character.origin.name }}</p>
-
-      <h2>Location</h2>
-      <p>{{ character.location.name }}</p>
     </div>
   </div>
 </template>
@@ -26,33 +22,52 @@ export default {
 <style scoped>
 .card-container {
   border-radius: 20px;
-  background-color: lightblue;
-  display: flex;
-  height: 100%;
-  width: 100%;
+  position: relative;
 }
 
 .card-container > img {
-  border-radius: 20px 0px 0px 20px;
+  border-radius: 20px 20px 0px 0px;
+  object-fit: contain;
+  z-index: 0;
+}
+
+.status {
+  position: absolute;
+  z-index: 1;
+  font-size: 1.5em;
+  font-weight: bold;
+  right: 10px;
+  top: -10px;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.alive {
+  background-color: rgb(0, 117, 0);
+}
+
+.dead {
+  background-color: rgb(117, 22, 22);
+}
+
+.unknown {
+  background-color: rgb(59, 59, 59);
 }
 
 .card-body {
-  padding-left: 10px;
-  height: 100%;
-  width: 100%;
-  background-color: #383838;
+  margin-top: -5px;
+  text-align: center;
   display: flex;
-  flex-direction: column;
-  border-radius: 0px 20px 20px 0px;
+  justify-content: center;
+  align-items: center;
+  height: 75px;
+  background-color: #383838;
+  border-radius: 0px 0px 20px 20px;
 }
 
-.card-body p {
-  margin-top: 1px;
-  margin-bottom: 5px;
-}
-
-.card-body h1,
-h2 {
-  margin-bottom: 5px;
+.card-body h1 {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  font-size: 1.3em;
 }
 </style>
