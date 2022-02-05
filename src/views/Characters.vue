@@ -19,6 +19,7 @@
 
     <div v-if="!characters || characters.length == 0">No character found</div>
 
+    <h1>Total: {{ count }}</h1>
     <div v-if="characters" class="container">
       <div
         v-for="(character, idx) in characters.results"
@@ -34,59 +35,7 @@
       </div>
     </div>
 
-    <div class="page-nav">
-      <div v-if="currentPage > 2" class="flex">
-        <p
-          @click="
-            () => {
-              getPage(1);
-            }
-          "
-        >
-          1
-        </p>
-        <p>...</p>
-      </div>
-      <div v-if="currentPage > 1">
-        <p
-          @click="
-            () => {
-              getPage(currentPage - 1);
-            }
-          "
-        >
-          {{ currentPage - 1 }}
-        </p>
-      </div>
-      <div>
-        <p class="active">{{ currentPage }}</p>
-      </div>
-      <div v-if="currentPage < totalPage">
-        <p
-          @click="
-            () => {
-              getPage(currentPage + 1);
-            }
-          "
-        >
-          {{ currentPage + 1 }}
-        </p>
-      </div>
-
-      <div v-if="currentPage + 1 < totalPage" class="flex">
-        <p>...</p>
-
-        <p
-          @click="
-            () => {
-              getPage(totalPage);
-            }
-          "
-        >
-          {{ totalPage }}
-        </p>
-      </div>
-    </div>
+    <Pagination />
   </div>
 </template>
 
@@ -94,11 +43,16 @@
 import { mapGetters, mapActions, mapMutations } from "vuex";
 
 import Card from "@/components/Card.vue";
+import Pagination from "@/components/Pagination.vue";
 
 export default {
   name: "Characters",
   components: {
-    Card
+    Card,
+    Pagination
+  },
+  created() {
+    document.title = "Rick & Morty Characters";
   },
 
   data: function () {
@@ -110,7 +64,7 @@ export default {
 
   watch: {
     status: function (newStatus) {
-      this.$store.commit("setCurrentStatus", newStatus);
+      this.setCurrentStatus(newStatus);
     },
     "$route.query.page": function () {
       this.setCurrentPage(this.$route.query.page);
@@ -123,21 +77,9 @@ export default {
     ...mapMutations([
       "setCurrentPage",
       "setCurrentName",
-      "setCurrentCharacter"
+      "setCurrentCharacter",
+      "setCurrentStatus"
     ]),
-
-    changeStatus: function (evt, status) {
-      if (this.$store.getters.getCurrentStatus == status) {
-        evt.preventDefault();
-        this.status = "";
-        evt.target.checked = false;
-      }
-    },
-    getPage: function (page) {
-      this.setCurrentPage(page);
-      this.getCharacters();
-      this.$router.push({ path: `/characters`, query: { page } });
-    },
 
     onEnter: function () {
       this.setCurrentName(this.filter);
@@ -154,7 +96,8 @@ export default {
       count: "getCurrentCount",
       totalPage: "getTotalPage",
       currentPage: "getCurrentPage",
-      getCharactersPage: "getCharactersPage"
+      getCharactersPage: "getCharactersPage",
+      getCurrentStatus: "getCurrentStatus"
     }),
 
     characters() {
@@ -192,22 +135,6 @@ export default {
   cursor: pointer;
 }
 
-.page-nav {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 1.5em;
-}
-
-.page-nav p {
-  margin: 20px;
-  cursor: pointer;
-}
-
-.active {
-  font-weight: bold;
-}
-
 .filter-input {
   margin-top: 30px;
   margin-bottom: 30px;
@@ -226,9 +153,5 @@ export default {
   color: #e2e2e2;
   margin-left: 20px;
   text-align: center;
-}
-
-.flex {
-  display: flex;
 }
 </style>

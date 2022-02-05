@@ -49,7 +49,6 @@ export default createStore({
       let current = state.getters.getCharactersPage(page);
 
       if (current) {
-        console.log("use cached page", page);
         return page;
       }
 
@@ -86,7 +85,6 @@ export default createStore({
       const rawCharacter = await fetch(url);
 
       if (rawCharacter.status != 200) {
-        console.log("error");
         return;
       }
 

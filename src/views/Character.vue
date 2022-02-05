@@ -37,6 +37,9 @@
 export default {
   name: "Character",
   components: {},
+  created() {
+    document.title = this.character.name;
+  },
   computed: {
     character() {
       const cache = this.$store.getters.getCurrentCharacter;
