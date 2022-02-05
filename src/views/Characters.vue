@@ -189,6 +189,7 @@ export default {
 .card-holder {
   width: 300px;
   margin-bottom: 10px;
+  cursor: pointer;
 }
 
 .page-nav {
