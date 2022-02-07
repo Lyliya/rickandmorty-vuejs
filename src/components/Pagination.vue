@@ -61,7 +61,6 @@ export default {
   name: "Pagination",
   computed: {
     ...mapGetters({
-      count: "getCurrentCount",
       totalPage: "getTotalPage",
       currentPage: "getCurrentPage",
       getCharactersPage: "getCharactersPage"
